@@ -20,21 +20,22 @@ def set_data():
     edges = [[0 for j in range(2)] for k in range(m)] 
 
     argv_counter = 4;
-    for i in range(m): #0 do 9 czyli 10
+    for i in range(m):
         edges[i][0] = int(sys.argv[argv_counter])
         edges[i][1] = int(sys.argv[argv_counter+1])
 
         argv_counter+=2
 
-    print(if_directed)
-    print(n)
-    print(m)
-    print(edges)
+    print("Directed graph") if if_directed else print("Unirected graph")
+    print("Nodes' number: ", n)
+    print("Edges' number: ", m)
+    print("Edges: ", edges)
 
-def dfs(node):
+def dfs(prev_node, node):
 
     if node not in visited_nodes:
         visited_nodes.append(node)
+        add_edge(prev_node, node)
         neighbour = []
         for e in edges:
             if node == e[0]:
@@ -43,8 +44,15 @@ def dfs(node):
                 neighbour.append(e[0])
 
         for n in neighbour:
-            dfs(n)
+            dfs(node, n)
 
+def add_edge(prev_node, node):
+    new_edge = [prev_node, node]
+    revert_new_edge = [node, prev_node]
+
+    if new_edge in edges or (revert_new_edge in edges and not if_directed):
+        visited_edges.append(new_edge)
+    
 
 try:
     set_data()
@@ -52,9 +60,11 @@ except Exception as e:
     print("Invalid args!")
     sys.exit()
 
-global visited_nodes
+global visited_nodes, visited_edges
 visited_nodes = []
-dfs(1)
+visited_edges = []
+dfs(1,1)
 
 print("Visited nodes: ", visited_nodes)
+print("Visited edges: ", visited_edges)
 
