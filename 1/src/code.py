@@ -20,9 +20,9 @@ def set_data():
     edges = [[0 for j in range(2)] for k in range(m)] 
 
     argv_counter = 4;
-    for i in range(0, 2*m-3):
-        edges[i][0] = sys.argv[argv_counter]
-        edges[i][1] = sys.argv[argv_counter+1]
+    for i in range(m): #0 do 9 czyli 10
+        edges[i][0] = int(sys.argv[argv_counter])
+        edges[i][1] = int(sys.argv[argv_counter+1])
 
         argv_counter+=2
 
@@ -31,6 +31,19 @@ def set_data():
     print(m)
     print(edges)
 
+def dfs(node):
+
+    if node not in visited_nodes:
+        visited_nodes.append(node)
+        neighbour = []
+        for e in edges:
+            if node == e[0]:
+                neighbour.append(e[1])
+            elif node == e[1] and not if_directed:
+                neighbour.append(e[0])
+
+        for n in neighbour:
+            dfs(n)
 
 
 try:
@@ -38,4 +51,10 @@ try:
 except Exception as e:
     print("Invalid args!")
     sys.exit()
+
+global visited_nodes
+visited_nodes = []
+dfs(1)
+
+print("Visited nodes: ", visited_nodes)
 
