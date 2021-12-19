@@ -1,9 +1,6 @@
 # https://cpp-polska.pl/post/potwor-przeszlosci-makefile-cz-1
+# make -B -s because it doesn't update itself
 main:
-	g++ main.cpp -o main
-
-clean:
-	rm -f main
-
-dump:
-	g++ main.cpp -S
+	@g++ dijkstra.cpp -o dijkstra
+	./dijkstra -d Long-C/Long-C.0.0.gr -ss zrodla.ss -oss wyniki.ss.res
+	rm -f dijkstra
