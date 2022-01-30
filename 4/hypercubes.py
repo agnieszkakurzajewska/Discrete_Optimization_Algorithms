@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 import random
 
 def printGraph(G):
-    nx.draw_shell(G)
+    pos=nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, node_size=5)
+    labels = nx.get_edge_attributes(G,'u')
+    nx.draw_networkx_edge_labels(G,pos, edge_labels=labels)
+
     plt.show()
 
 def H(x):
@@ -27,19 +31,7 @@ def addUToEdges(G):
     for e in G.edges:
         G.add_edge(e[0], e[1], u = randomizeU(e))
     return G
-# def makeGraphDirected(G):
-#     for e in G.edges:
-#         if (H(e[0]) > H(e[1])):
-#             G.add_edge(e[0], e[1])
-#         else:
-#             G.add_edge(e[1], e[0])
-#     return G
 
 k = 3
-G = nx.hypercube_graph(k)
-n = G.number_of_nodes()
-# print(H.number_of_nodes())
-b = (1, 1, 1)
-G = addUToEdges(G)
-print(G.edges(data=True))
-# printGraph(H)
+G = addUToEdges(nx.hypercube_graph(k))
+printGraph(G)
