@@ -1,15 +1,15 @@
-from tkinter import N
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
+import sys
 
-def printGraph(G):
-    pos=nx.spring_layout(G)
-    nx.draw(G, pos, with_labels=True, node_size=5)
-    labels = nx.get_edge_attributes(G,'u')
-    nx.draw_networkx_edge_labels(G,pos, edge_labels=labels)
-
-    plt.show()
+def printGraph(G, k):
+    if(k<10):
+        pos=nx.spring_layout(G)
+        nx.draw(G, pos, with_labels=True, node_size=5)
+        labels = nx.get_edge_attributes(G,'u')
+        nx.draw_networkx_edge_labels(G,pos, edge_labels=labels)
+        plt.show()
 
 def H(x):
     x_to_string = ''.join(map(str, x))
@@ -32,6 +32,6 @@ def addUToEdges(G):
         G.add_edge(e[0], e[1], u = randomizeU(e))
     return G
 
-k = 3
+k = int(sys.argv[1])
 G = addUToEdges(nx.hypercube_graph(k))
-printGraph(G)
+printGraph(G, k)
