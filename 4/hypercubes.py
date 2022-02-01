@@ -14,7 +14,7 @@ def printGraph(G):
     
     if(getK(G)<10):
         pos=nx.spring_layout(G)
-        nx.draw(G, pos, with_labels=True, node_size=5)
+        nx.draw(G, pos, with_labels=True, node_size=5, arrowsize=3, arrowstyle='fancy')
         labels = nx.get_edge_attributes(G,'u')
         nx.draw_networkx_edge_labels(G,pos, edge_labels=labels)
         plt.show()
@@ -32,19 +32,20 @@ def e(i):
     return int(i_to_string, 2)
 
 def printEdge(G, e):
-    x1 = np.asarray(e[0])
-    s1 = ''
-    for x in x1:
-        s1 = s1+str(x)
-    x1 = int(s1, 2)
-    x2 = np.asarray(e[1])
-    s2 = ''
-    for x in x2:
-        s2 = s2+str(x)
-    x2 = int(s2, 2)
-    u = G[e[0]][e[1]]['u']
-    f = G[e[0]][e[1]]['f']
-    print (str(x1)+" => "+str(x2)+"  u="+str(u)+" f="+str(f))
+    if G.has_edge(e[0], e[1]):
+        x1 = np.asarray(e[0])
+        s1 = ''
+        for x in x1:
+            s1 = s1+str(x)
+        x1 = int(s1, 2)
+        x2 = np.asarray(e[1])
+        s2 = ''
+        for x in x2:
+            s2 = s2+str(x)
+        x2 = int(s2, 2)
+        u = G[e[0]][e[1]]['u']
+        f = G[e[0]][e[1]]['f']
+        print (str(x1)+" => "+str(x2)+"  u="+str(u)+" f="+str(f))
 
 
 
@@ -59,14 +60,19 @@ def addUFToEdges(G):
 
 def createGraph(k):
     k = int(k)
-    G = nx.hypercube_graph(int(k))
+    nodes = nx.hypercube_graph(int(k))
+    G = nx.DiGraph()
+    G.add_nodes_from(nodes)
+    G.add_edges_from(nodes.edges)
     G = addUFToEdges(G)
     return G
 
 def createResidualGraph(G):
     k = getK(G)
-    Gf = nx.hypercube_graph(int(k))
-
+    nodes = nx.hypercube_graph(int(k))
+    Gf = nx.DiGraph()
+    Gf.add_nodes_from(nodes)
+    # Gf.add_edges_from(nodes.edges)
     for e in G.edges.data():
         u = G[e[0]][e[1]]['u']
         f = G[e[0]][e[1]]['f']
@@ -99,53 +105,101 @@ def updateG(G, flow, shortest_path):
         v2 = shortest_path[i]
         f = G[v1][v2]['f']
         u = G[v1][v2]['u']
-        nx.set_edge_attributes(G, {(v1, v2): {"f": f+flow}})
+        nx.set_edge_attributes(G, {(v1, v2): {"f": f+flow, "u": u}})
     return G
 
-def updateGf(G, Gf):
-    for e in G.edges.data():
-        u = G[e[0]][e[1]]['u']
-        f = G[e[0]][e[1]]['f']
-        if f<u and f != 0:
-            Gf[e[0]][e[1]]['f']  = u-f
-        if f==u and f != 0:
-            Gf.remove_edge(e[0], e[1])
-            Gf.add_edge(e[1], e[0], u = u, f = u)
-            print("usunalem i dodalem krawedz krawedz z GF")
-            print(Gf[e[0]][e[1]])
-        if f==0:
-            Gf[e[0]][e[1]]['f']  = u            
-    return Gf
+# def updateGf(G, Gf):
+#     for e in G.edges.data():
+#         u = G[e[0]][e[1]]['u']
+#         f = G[e[0]][e[1]]['f']
+#         if f<u and f != 0:
+#             Gf[e[0]][e[1]]['f']  = u-f
+#         if f==u and f != 0:
+#             Gf.remove_edge(e[0], e[1], u, f)
+#             Gf.add_edge(e[1], e[0], u = u, f = u)
+#             print("usunalem i dodalem krawedz krawedz z GF")
+#             print(Gf[e[0]][e[1]])
+#         if f==0:
+#             Gf[e[0]][e[1]]['f']  = u            
+#     return Gf
     
 # main
 
 #init
 G = createGraph(sys.argv[1])
 Gf = createResidualGraph(G)
-i = 0
+print(nx.is_directed(G))
+print(nx.is_directed(Gf))
 print("G: ")
 for e in G.edges.data():
-    print(e)
+    printEdge(G, e)
 print("Gf: ")
 for e in Gf.edges.data():
+    printEdge(Gf, e)
+flow, shortest_path  = getShortestPath(Gf)
+print(flow)
+print(shortest_path)
+
+G = updateG(G, flow, shortest_path)
+Gf = createResidualGraph(G)
+print(nx.is_directed(G))
+print(nx.is_directed(Gf))
+print("G: ")
+for e in G.edges.data():
     printEdge(G, e)
+print("Gf: ")
+for e in Gf.edges.data():
+    printEdge(Gf, e)
+flow, shortest_path  = getShortestPath(Gf)
+print(flow)
+print(shortest_path)
+
+G = updateG(G, flow, shortest_path)
+Gf = createResidualGraph(G)
+print(nx.is_directed(G))
+print(nx.is_directed(Gf))
+print("G: ")
+for e in G.edges.data():
+    printEdge(G, e)
+print("Gf: ")
+for e in Gf.edges.data():
+    printEdge(Gf, e)
+# flow, shortest_path  = getShortestPath(Gf)
+# print("flow: "+str(flow))
+# print("ściezka: "+str(shortest_path))
+
+# G = updateG(G, flow, shortest_path)
+# Gc = createResidualGraph(G)
+# print("G: ")
+# for e in G.edges.data():
+#     printEdge(G, e)
+# print("Gc: ")
+# for e in Gc.edges.data():
+#     printEdge(Gc, e)
+# i = 0
+# print("G: ")
+# for e in G.edges.data():
+#     printEdge(G, e)
+# print("Gf: ")
+# for e in Gf.edges.data():
+#     printEdge(Gf, e)
 
 # while (i <3):
 #     flow, shortest_path  = getShortestPath(Gf)
+#     print(G)
+#     print(Gf)
 #     print(flow)
 #     print(shortest_path)
 #     G = updateG(G, flow, shortest_path)
-#     Gf = updateGf(G, Gf)
+#     Gf = createResidualGraph(G)
 #     print("G: ")
-#     for e in G.edges.data():
-#         print(e)
+#     # for e in G.edges.data():
+#     #     printEdge(G, e)
 #     print("Gf: ")
-#     for e in Gf.edges.data():
-#         print(e)
+#     # for e in Gl.edges.data():
+#     #     printEdge(Gl, e)
 #     i = i+1
 #     print("       ")
-
-#
 
 
 
