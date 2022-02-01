@@ -45,7 +45,7 @@ def printEdge(G, e):
         x2 = int(s2, 2)
         u = G[e[0]][e[1]]['u']
         f = G[e[0]][e[1]]['f']
-        print (str(x1)+" => "+str(x2)+"  u="+str(u)+" f="+str(f))
+        printw(str(x1)+" => "+str(x2)+"  u="+str(u)+" f="+str(f))
 
 def randomizeC(e):
     l = max(H(e[0]), Z(e[0]), H(e[1]), Z(e[1]))
@@ -82,6 +82,23 @@ def createResidualGraph(G):
             Gf.add_edge(e[0], e[1], u = u, f = u)
     return Gf
 
+def getHeaviestPath(G):
+    s = list(G.nodes)[0]
+    t = list(G.nodes)[G.number_of_nodes()-1]
+
+    max_flow = 0
+    best_path = None
+
+    for path in nx.all_simple_paths(G, source=s, target=t):
+         flow = 0
+         for i in range(1, len(path)):
+            flow = flow + G[path[i-1]][path[i]]['f']
+            if flow>max_flow:
+                max_flow = flow
+                best_path = path
+    
+    return best_path, max_flow
+
 def getShortestPath(G):
     s = list(G.nodes)[0]
     t = list(G.nodes)[G.number_of_nodes()-1]
@@ -95,11 +112,8 @@ def getShortestPath(G):
             if min_flow == 0 or flow < min_flow:
                 min_flow = flow
     except Exception:
-        print("No shortest path")
+        printw("No shortest path")
     return min_flow, shortest_path
-
-
-
 
 def updateG(G, flow, shortest_path):
     for i in range(1, len(shortest_path)):
@@ -110,38 +124,46 @@ def updateG(G, flow, shortest_path):
         nx.set_edge_attributes(G, {(v1, v2): {"f": f+flow, "u": u}})
     return G
 
-
+def printw(str):
+    if sys.argv[2] == "True":
+        print(str)
 # main
 #init
 G = createGraph(sys.argv[1])
 Gf = createResidualGraph(G)
 
-print("\nG: ")
+printw("\nG: ")
 for e in G.edges.data():
     printEdge(G, e)
-print("Gf: ")
+printw("Gf: ")
 for e in Gf.edges.data():
     printEdge(Gf, e)
 
 i = 0
 should_search_again = True
 while (should_search_again):
-    print("\n")
+    printw("\n")
     flow, shortest_path  = getShortestPath(Gf)
     if shortest_path != 0:
-        print("The shortest path: "+str(shortest_path))
-        print("Flow in the shortest path: "+str(flow))
+        i = i+1
+        printw("The shortest path: "+str(shortest_path))
+        printw("Flow in the shortest path: "+str(flow))
         G = updateG(G, flow, shortest_path)
         Gf = createResidualGraph(G)
-        print("G: ")
+        printw("G: ")
         for e in G.edges.data():
             printEdge(G, e)
-        print("Gf: ")
+        printw("Gf: ")
         for e in Gf.edges.data():
             printEdge(Gf, e)
-        i = i+1
-        print("")
+        printw("")
     else:
         should_search_again = False
 
+# flow counting
+best_path, max_flow = getHeaviestPath(G)
+# printw(best_path)
+printw("Max flow: ")
+print(max_flow)
+printw(str(i)+" interations (founded paths)\n")
 
